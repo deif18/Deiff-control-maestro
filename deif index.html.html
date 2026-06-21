@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<style>
+  :root {
+    --bg: #0d0f12;
+    --panel: #16191d;
+    --accent: #ff3b30;
+    --accent-dim: #5c1815;
+    --text: #f2f2f2;
+    --text-dim: #8a8f98;
+    --ok: #30d158;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    overflow: hidden;
+  }
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 16px;
+    gap: 14px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo { font-size: 22px; font-weight: 800; letter-spacing: 1px; }
+  .status-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--text-dim);
+    display: inline-block; margin-right: 8px;
+    transition: background .2s;
+  }
+  .status-dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+  #connectBtn {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid #2a2e35;
+    border-radius: 20px;
+    padding: 9px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex; align-items: center;
+  }
+  #connectBtn.connected { color: var(--ok); border-color: rgba(48,209,88,.4); }
+
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 22px;
+  }
+
+  /* D-PAD */
+  .dpad {
+    display: grid;
+    grid-template-columns: 76px 76px 76px;
+    grid-template-rows: 76px 76px 76px;
+    gap: 8px;
+  }
+  .dbtn {
+    background: var(--panel);
+    border: 1px solid #22262d;
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    color: var(--text);
+    touch-action: none;
+    transition: background .08s, transform .08s;
+  }
+  .dbtn.active { background: var(--accent-dim); transform: scale(0.94); border-color: var(--accent); }
+  .dbtn.empty { background: transparent; border: none; }
+  .dpad-up    { grid-column: 2; grid-row: 1; }
+  .dpad-left  { grid-column: 1; grid-row: 2; }
+  .dpad-stop  { grid-column: 2; grid-row: 2; }
+  .dpad-right { grid-column: 3; grid-row: 2; }
+  .dpad-down  { grid-column: 2; grid-row: 3; }
+  .dpad-stop  { background: #1c1f24; font-size: 13px; font-weight: 700; color: var(--text-dim); }
+
+  /* SPEED */
+  .speed-block { width: 100%; max-width: 360px; }
+  .speed-label {
+    display: flex; justify-content: space-between;
+    font-size: 13px; color: var(--text-dim); margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .speed-value { color: var(--text); font-weight: 800; font-size: 14px; }
+  .speed-row { display: flex; gap: 5px; }
+  .speed-seg {
+    flex: 1; height: 38px;
+    background: var(--panel);
+    border: 1px solid #22262d;
+    border-radius: 8px;
+  }
+  .speed-seg.filled { background: var(--accent); border-color: var(--accent); }
+
+  /* IMPULSO */
+  #impulsoBtn {
+    width: 100%;
+    max-width: 360px;
+    padding: 20px;
+    border-radius: 18px;
+    border: 1px solid var(--accent);
+    background: linear-gradient(180deg, #2a0f0d, #1a0908);
+    color: var(--accent);
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-align: center;
+    touch-action: none;
+    transition: transform .08s, background .08s;
+  }
+  #impulsoBtn.active {
+    background: var(--accent);
+    color: #fff;
+    transform: scale(0.97);
+    box-shadow: 0 0 26px rgba(255,59,48,.6);
+  }
+
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    padding-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">deif</div>
+    <button id="connectBtn"><span class="status-dot" id="statusDot"></span><span id="connectLabel">Conectar</span></button>
+  </header>
+
+  <div class="main">
+    <div class="dpad">
+      <button class="dbtn dpad-up" data-cmd="A">▲</button>
+      <div class="dbtn empty"></div>
+      <button class="dbtn dpad-left" data-cmd="I">◄</button>
+      <button class="dbtn dpad-stop" data-cmd="S">STOP</button>
+      <button class="dbtn dpad-right" data-cmd="D">►</button>
+      <div class="dbtn empty"></div>
+      <button class="dbtn dpad-down" data-cmd="R">▼</button>
+      <div class="dbtn empty"></div>
+    </div>
+
+    <div class="speed-block">
+      <div class="speed-label">Velocidad <span class="speed-value" id="speedValue">9</span></div>
+      <div class="speed-row" id="speedRow"></div>
+    </div>
+
+    <button id="impulsoBtn">IMPULSO</button>
+  </div>
+
+  <footer>Conecta tu ESP32 "deif" por Bluetooth para empezar</footer>
+</div>
+
+<script>
+const SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const RX_CHAR_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+
+let device = null, server = null, rxChar = null;
+let speedLevel = 9; // 0-9
+const speedMap = [0,28,57,85,113,142,170,198,227,255];
+
+const connectBtn = document.getElementById('connectBtn');
+const connectLabel = document.getElementById('connectLabel');
+const statusDot = document.getElementById('statusDot');
+const speedRow = document.getElementById('speedRow');
+const speedValue = document.getElementById('speedValue');
+const impulsoBtn = document.getElementById('impulsoBtn');
+
+function buildSpeedBar() {
+  speedRow.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'speed-seg' + (i <= speedLevel + 1 ? ' filled' : '');
+    seg.dataset.level = i - 1;
+    seg.addEventListener('pointerdown', () => setSpeed(i - 1));
+    speedRow.appendChild(seg);
+  }
+}
+
+function setSpeed(level) {
+  speedLevel = level;
+  speedValue.textContent = level;
+  buildSpeedBar();
+  sendCmd('V' + speedMap[level]);
+}
+
+async function connect() {
+  try {
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ name: 'deif' }],
+      optionalServices: [SERVICE_UUID]
+    });
+    device.addEventListener('gattserverdisconnected', onDisconnected);
+    server = await device.gatt.connect();
+    const service = await server.getPrimaryService(SERVICE_UUID);
+    rxChar = await service.getCharacteristic(RX_CHAR_UUID);
+    onConnected();
+  } catch (err) {
+    console.error(err);
+    if (err.name !== 'NotFoundError') {
+      alert('No se pudo conectar: ' + err.message);
+    }
+  }
+}
+
+function onConnected() {
+  connectLabel.textContent = 'deif';
+  connectBtn.classList.add('connected');
+  statusDot.classList.add('on');
+  sendCmd('V' + speedMap[speedLevel]);
+}
+
+function onDisconnected() {
+  connectLabel.textContent = 'Conectar';
+  connectBtn.classList.remove('connected');
+  statusDot.classList.remove('on');
+  rxChar = null;
+}
+
+async function sendCmd(cmd) {
+  if (!rxChar) return;
+  try {
+    const data = new TextEncoder().encode(cmd);
+    if (rxChar.writeValueWithoutResponse) {
+      await rxChar.writeValueWithoutResponse(data);
+    } else {
+      await rxChar.writeValue(data);
+    }
+  } catch (e) {
+    console.error('Error enviando comando', e);
+  }
+}
+
+connectBtn.addEventListener('click', () => {
+  if (!rxChar) connect();
+});
+
+// D-pad: press and hold
+document.querySelectorAll('.dbtn[data-cmd]').forEach(btn => {
+  const cmd = btn.dataset.cmd;
+  const press = (e) => { e.preventDefault(); btn.classList.add('active'); sendCmd(cmd); };
+  const release = (e) => {
+    e.preventDefault();
+    btn.classList.remove('active');
+    if (cmd !== 'S') sendCmd('S');
+  };
+  btn.addEventListener('pointerdown', press);
+  btn.addEventListener('pointerup', release);
+  btn.addEventListener('pointerleave', release);
+  btn.addEventListener('pointercancel', release);
+});
+
+// Impulso: press and hold = 100% power
+const impulsoPress = (e) => { e.preventDefault(); impulsoBtn.classList.add('active'); sendCmd('P'); };
+const impulsoRelease = (e) => { e.preventDefault(); impulsoBtn.classList.remove('active'); sendCmd('Q'); };
+impulsoBtn.addEventListener('pointerdown', impulsoPress);
+impulsoBtn.addEventListener('pointerup', impulsoRelease);
+impulsoBtn.addEventListener('pointerleave', impulsoRelease);
+impulsoBtn.addEventListener('pointercancel', impulsoRelease);
+
+buildSpeedBar();
+
+if (!navigator.bluetooth) {
+  document.querySelector('footer').textContent = 'Este navegador no soporta Bluetooth. Usa Chrome en Android.';
+}
+</script>
+</body>
+</html>
