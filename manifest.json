@@ -4,19 +4,19 @@
   "display": "standalone",
   "name": "control maestro",
   "orientation": "any",
-  "scope": "//",
+  "scope": "/Deiff-control-maestro/",
   "short_name": "deif18.github",
-  "start_url": "https://deif18.github.io/Deiff-control-maestro/",
+  "start_url": "/Deiff-control-maestro/",
   "theme_color": "#670698",
   "lang": "es",
   "description": "controlar sumo con esp32",
-  "id": "deif18.github"
+  "id": "deif18.github",
   "icons": [
-{
- "src": "icon-192.png",
+    {
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
-},
+    },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
